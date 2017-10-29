@@ -28,10 +28,11 @@ wait_time = 15
 ## Commands
 
 - `/adduser <tg_id> <name>`: admin command, adds a user to the database. The ID can be obtained with the `/me` command
-- `/listusers`: list all users in the database
-- `/rmuser <tg_id>`: remove a user from the database, including all their stored reminders
+- `/listusers`: admin command, list all users in the database
+- `/rmuser <tg_id>`: admin command, remove a user from the database, including all their stored reminders
 - `/me`: find Telegram ID
 - `/remember`: create a new reminder. The bot will ask for both date and message
 - `/remember <datetime>`: create a new reminder. The bot will only ask for a message
+- `/cancel`: cancel current operation
 
 Note that all dates must be written in `YYYY-MM-DD hh:mm` format.
