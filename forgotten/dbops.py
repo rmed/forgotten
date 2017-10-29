@@ -27,6 +27,7 @@
 
 """Database operations."""
 
+import datetime
 import sys
 import threading
 from functools import wraps
@@ -62,7 +63,7 @@ ENABLE_FK = 'PRAGMA foreign_keys = ON'
 QUERY_TG_IDS = 'SELECT tg_id FROM users'
 QUERY_REMINDERS = (
     'SELECT * FROM reminders '
-    "WHERE datetime(date) < datetime('now')"
+    "WHERE date < :now)"
 )
 QUERY_USERS = 'SELECT tg_id, name FROM users'
 REMOVE_USER = 'DELETE FROM users WHERE tg_id=:user_id'
@@ -159,7 +160,8 @@ def get_active_reminders(db):
     Args:
         db: Database connector
     """
-    return db.query(QUERY_REMINDERS)
+    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
+    return db.query(QUERY_REMINDERS, now=now)
 
 @locked
 def remove_reminders(db, reminder_ids):
