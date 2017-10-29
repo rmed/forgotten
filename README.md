@@ -13,12 +13,14 @@ owner = OWNER_ID
 
 [core]
 db_path = /path/to/database/file
+media_path = /path/to/store/media/files
 wait_time = 15
 ```
 
 - `token`: can be obtained from the bot father when creating the bot
 - `owner`: can be obtained from the bot by executing the `/me` command when it is launched. On the first launch, a value of `0` is recommended before you specify your Telegram ID
 - `db_path`: the user must have read/write permissions on the specified path
+- `media_path`: photos sent for the reminders will be stored here
 - `wait_time`: time to wait (in minutes) between each check for reminders that are ready to be sent
 
 ## Execution
@@ -31,8 +33,8 @@ wait_time = 15
 - `/listusers`: admin command, list all users in the database
 - `/rmuser <tg_id>`: admin command, remove a user from the database, including all their stored reminders
 - `/me`: find Telegram ID
-- `/remember`: create a new reminder. The bot will ask for both date and message
-- `/remember <datetime>`: create a new reminder. The bot will only ask for a message
+- `/remember`: create a new reminder. The bot will ask for both date and message/photo
+- `/remember <datetime>`: create a new reminder. The bot will only ask for a message/photo
 - `/cancel`: cancel current operation
 
 Note that all dates must be written in `YYYY-MM-DD hh:mm` format.
