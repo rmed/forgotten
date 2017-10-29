@@ -1,0 +1,2 @@
+records==0.5.2
+pyTelegramBotAPI==3.2.1
