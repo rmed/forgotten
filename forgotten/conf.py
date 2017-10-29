@@ -52,6 +52,7 @@ def parse_conf():
 
         [core]
         db_path = /path/to/db.sqlite
+        media_path = /path/to/store/media
         wait_time = 15
     """
     conf_path = os.path.abspath(os.getenv('FORGOTTEN_CONF', ''))
@@ -68,8 +69,9 @@ def parse_conf():
     SETTINGS['token'] = parser['tg']['token']
     SETTINGS['owner'] = int(parser['tg'].get('owner', '-1'))
 
-    # Database
+    # Paths
     SETTINGS['db_path'] = parser['core']['db_path']
+    SETTINGS['media_path'] = parser['core']['media_path']
 
     # Worker
     SETTINGS['wait_time'] = int(parser['core'].get('wait_time', '15')) * 60

@@ -27,6 +27,7 @@
 
 """Helper functions."""
 
+import os
 import time
 from functools import wraps
 
@@ -52,8 +53,27 @@ def forgotten_worker():
         to_delete = []
 
         for reminder in reminders:
-            bot.send_message(reminder.user_id, reminder.text)
             to_delete.append(reminder.id)
+
+            if reminder.text.startswith('_photo:'):
+                # Must send photo
+                file_path = reminder.text.replace('_photo:', '')
+
+                if not os.path.exists(file_path):
+                    bot.send_message(reminder.user_id, 'Cannot find photo')
+                    return
+
+                # Send file
+                with open(file_path, 'rb') as photo:
+                    bot.send_photo(reminder.user_id, photo)
+
+                # Remove file
+                os.unlink(file_path)
+
+                continue
+
+            # Send text
+            bot.send_message(reminder.user_id, reminder.text)
 
         # Remove old reminders
         if to_delete:

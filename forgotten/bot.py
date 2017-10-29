@@ -30,8 +30,9 @@
 import datetime
 import logging
 import os
-import telebot
+import time
 
+import telebot
 from forgotten.conf import SETTINGS
 from forgotten.dbops import DB
 from forgotten import dbops
@@ -175,10 +176,13 @@ def handle_remember(message):
         # Continue with text
         reply = bot.reply_to(
             message,
-            'Specify a message to remember or cancel with /cancel'
+            'Specify a message or send a photo to remember, or cancel with /cancel'
         )
 
-        bot.register_next_step_handler(reply, lambda m: _remember_text(m, date))
+        bot.register_next_step_handler(
+            reply,
+            lambda m: _remember_content(m, date)
+        )
 
         return
 
@@ -210,22 +214,69 @@ def _remember_date(message):
     # Obtained date, continue with text
     reply = bot.send_message(
         message.chat.id,
-        'Specify a message to remember or cancel with /cancel'
+        'Specify a message or send a photo to remember, or cancel with /cancel'
     )
 
-    bot.register_next_step_handler(reply, lambda m: _remember_text(m, date))
+    bot.register_next_step_handler(reply, lambda m: _remember_content(m, date))
 
-def _remember_text(message, date):
-    """Ask for the text to remember."""
-    if not message.text or is_cancel_cmd(message):
+def _remember_content(message, date):
+    """Ask for the content to remember.
+
+    Content may be a text or photo.
+    """
+    if message.content_type not in ('text', 'photo'):
+        reply = bot.reply_to(message, 'Content must be a text or a photo')
+        bot.register_next_step_handler(
+            reply,
+            lambda m: _remember_content(m, date)
+        )
         return
 
-    # Store reminder
-    try:
-        dbops.add_reminder(DB, message.text, date, message.chat.id)
+    # Text
+    if message.text:
+        if is_cancel_cmd(message):
+            return
 
-    except Exception as e:
-        bot.reply_to(message, 'Failed to store reminder: %s' % e)
-        return
+        # Store reminder
+        try:
+            dbops.add_reminder(DB, message.text, date, message.chat.id)
+
+        except Exception as e:
+            bot.reply_to(message, 'Failed to store reminder: %s' % e)
+            return
+
+    # Photo
+    if message.photo:
+        # Get photo with original size
+        photosize = message.photo[-1]
+        file_info = bot.get_file(photosize.file_id)
+        downloaded = bot.download_file(file_info.file_path)
+
+        store_path = os.path.join(SETTINGS['media_path'], str(time.time()))
+
+        while os.path.exists(store_path):
+            store_path = os.path.join(SETTINGS['media_path'], str(time.time()))
+
+        with open(store_path, 'wb') as new_file:
+            try:
+                new_file.write(downloaded)
+
+            except Exception as e:
+                bot.reply_to(message, 'Failed to store photo: %s' % e)
+                return
+
+        # Store reminder
+        try:
+            dbops.add_reminder(
+                DB,
+                '_photo:%s' % store_path,
+                date,
+                message.chat.id
+            )
+
+        except Exception as e:
+            bot.reply_to(message, 'Failed to store reminder: %s' % e)
+            os.unlink(store_path)
+            return
 
     bot.send_message(message.chat.id, 'Reminder stored!')

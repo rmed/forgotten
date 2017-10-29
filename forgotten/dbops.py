@@ -63,7 +63,7 @@ ENABLE_FK = 'PRAGMA foreign_keys = ON'
 QUERY_TG_IDS = 'SELECT tg_id FROM users'
 QUERY_REMINDERS = (
     'SELECT * FROM reminders '
-    "WHERE date < :now)"
+    "WHERE date < :now"
 )
 QUERY_USERS = 'SELECT tg_id, name FROM users'
 REMOVE_USER = 'DELETE FROM users WHERE tg_id=:user_id'
